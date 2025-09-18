@@ -4,8 +4,8 @@ import { basePath } from '../../config';
 export default function Header() {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     const image = storedUser?.image && !Array.isArray(storedUser.image)
-        ? `${basePath}/public/${storedUser.image}`
-        : `${basePath}/public/user.svg`;
+        ? `${basePath}/public/images/${storedUser.image}`
+        : `${basePath}/public/images/user.svg`;
     const navigate = useNavigate();
     const handleLogout = (e) => {
         e.preventDefault();

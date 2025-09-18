@@ -8,6 +8,10 @@ import PerfilPage from "./pages/setups/PerfilPage";
 import ConfigPage from "./pages/setups/ConfigPage";
 import InicioPage from "./pages/dashboard/InicioPage";
 import ListPage from "./pages/users/ListPage";
+import EditPage from "./pages/users/EditPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 
 export default function App() {
@@ -57,8 +61,33 @@ export default function App() {
           <Route path="profile" element={<PerfilPage />} />
 
           {/* Rutas de configuración */}
-          <Route path="config/preferences" element={<ConfigPage />} />
-          <Route path="config/users" element={<ListPage />} />
+          <Route
+            path="config/preferences"
+            element={
+              <ProtectedRoute user={user} allowedRoles={["ROLE_ADMIN", "ROLE_SUPERVISOR"]}>
+                <ConfigPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="config/users"
+            element={
+              <ProtectedRoute user={user} allowedRoles={["ROLE_ADMIN"]}>
+                <ListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="config/edit/user/:id"
+            element={
+              <ProtectedRoute user={user} allowedRoles={["ROLE_ADMIN"]}>
+                <EditPage />
+              </ProtectedRoute>
+            }
+          />
+            {/* Ruta fallback */}
+            <Route path="unauthorized" element={<UnauthorizedPage />} />
+            <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

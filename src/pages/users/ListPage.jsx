@@ -1,38 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import UserTable from "../../components/Users/UserTable";
+import { listUsers } from "../../services/UsersService";
+import { toast } from "react-toastify";
 
 export default function ListPage() {
-  // Arreglo de ejemplo
-  const initialUsers = [
-    {
-      user_id: 1,
-      image: null,
-      user_name: "Hector Vera",
-      country_id: 1,
-      email: "hector@example.com",
-      activo: 1,
-      roles: [{ role: { description: "Admin" } }],
-    },
-    {
-      user_id: 2,
-      image: null,
-      user_name: "Maria Perez",
-      country_id: 2,
-      email: "maria@example.com",
-      activo: 0,
-      roles: [{ role: { description: "User" } }],
-    },
-  ];
+  const [users, setUsers] = useState([]);
 
-  console.log('initialUsers: ', initialUsers)
-  // Estado local para manejar cambios
-  const [users, setUsers] = useState(initialUsers);
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["users"],
+    queryFn: listUsers,
+  });
+
+  // Guardar data en estado local
+  useEffect(() => {
+    if (data) setUsers(data);
+
+    // Mostrar toast si no hay usuarios después de cargar
+    if (!isLoading && data && data.length === 0) {
+      toast.error("No hay usuarios para mostrar");
+    }
+  }, [data, isLoading]);
+
+  // Toast si hay error
+  useEffect(() => {
+    if (isError) {
+      toast.error(`Error al obtener usuarios: ${error.message}`);
+    }
+  }, [isError, error]);
+
+  if (isLoading) {
+    return <p>Cargando usuarios...</p>;
+  }
 
   return (
     <div className="container mt-4">
-      <h2 className="h5 mb-3">Lista de usuarios (ejemplo)</h2>
-
-      {/* UserTable recibe users y setUsers */}
+      <h2 className="h5 mb-3">Lista de usuarios</h2>
       <UserTable users={users} setUsers={setUsers} />
     </div>
   );

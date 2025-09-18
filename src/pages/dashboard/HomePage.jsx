@@ -5,8 +5,6 @@ import Header from "../../components/HomePage/Header";
 
 export default function HomePage() {
   const [collapsed, setCollapsed] = useState(false);
-  const storedUser = JSON.parse(localStorage.getItem("user")) || null;
-  console.log('storedUser: ', storedUser)
   return (
     <div className="d-grid" style={{ gridTemplateRows: "auto 1fr", height: "100vh" }}>
       {/* Header */}
