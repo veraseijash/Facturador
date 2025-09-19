@@ -581,7 +581,7 @@ body {
   padding: 0px;
 }
 
-.ant-dropdown.ant-dropdown-placement-bottomRight {
+.ant-dropdown.ant-dropdow-placement-bottomRight {
   min-width: inherit !important;
 }
 
@@ -3236,4 +3236,67 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
   svg
   path {
   fill: #8c8c8c;
+}
+
+.nav-link {
+  cursor: pointer;
+}
+.nav-link:hover, .nav-link.active {
+  font-weight: 600;
+}
+.navbar-light {
+  background-color: #e3f2fd;
+}
+.card-invoicing {
+  width: 100%;
+  border: 2px solid #e3f2fd;
+}
+.card-invoicing .card-title {
+  background-color: #e3f2fd;
+  display: flex;
+  justify-content: space-between;
+}
+.collapse-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.collapse-content.show {
+  max-height: 100%; /* ajusta según el contenido */
+}
+
+.collapse-icon {
+  display: inline-block;       /* necesario para que transform funcione */
+  transition: transform 0.3s ease;
+}
+
+.collapse-icon.rotate {
+  transform: rotate(180deg);   /* gira 180 grados */
+}
+
+.blancoConPlan, .blancoSinPlan,.blancoConPlan:hover, .blancoSinPlan:hover {
+  background-color: white;
+  border: 1px solid #858b85;
+  padding: 0px 6px;
+}
+.amarilloConPlan, .amarilloSinPlan, .amarilloConPlan:hover, .amarilloSinPlan:hover {
+  background-color: #f7f794;
+  border: 1px solid #858b85;
+  padding: 0px 6px;
+}
+.verdeConPlan, .verdeSinPlan, .verdeConPlan:hover, .verdeSinPlan:hover {
+  background-color: #68e568;
+  border: 1px solid #858b85;
+  padding: 0px 6px;
+}
+.rojoConPlan, .rojoSinPlan, .rojoConPlan:hover, .rojoSinPlan:hover {
+  background-color: #d9534f;
+  border: 1px solid #858b85;
+  padding: 0px 6px;
+}
+.grisConPlan, .grisSinPlan, .grisConPlan:hover, .grisSinPlan:hover {
+  background-color: #a8b4a8;
+  border: 1px solid #858b85;
+  padding: 0px 6px;
 }

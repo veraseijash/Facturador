@@ -12,6 +12,7 @@ import EditPage from "./pages/users/EditPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import InvoicingPage from "./pages/invoicing/InvoicingPage";
 
 
 export default function App() {
@@ -64,7 +65,7 @@ export default function App() {
           <Route
             path="config/preferences"
             element={
-              <ProtectedRoute user={user} allowedRoles={["ROLE_ADMIN", "ROLE_SUPERVISOR"]}>
+              <ProtectedRoute user={user} allowedRoles={["ROLE_ADMIN"]}>
                 <ConfigPage />
               </ProtectedRoute>
             }
@@ -85,6 +86,14 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="invoicing/"
+            element={
+              <ProtectedRoute user={user} allowedRoles={["ROLE_ADMIN", "ROLE_FACTURADOR"]}>
+                <InvoicingPage />
+              </ProtectedRoute>
+            }
+          />          
             {/* Ruta fallback */}
             <Route path="unauthorized" element={<UnauthorizedPage />} />
             <Route path="*" element={<NotFoundPage />} />

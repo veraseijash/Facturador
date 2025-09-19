@@ -6,7 +6,10 @@ export default function SidebarNav() {
     const isAdmin = Array.isArray(storedUser.role_name)
     ? storedUser.role_name.includes("ROLE_ADMIN")
     : storedUser.role_name === "ROLE_ADMIN";
-
+    const isFacturador = Array.isArray(storedUser.role_name)
+    ? storedUser.role_name.includes("ROLE_ADMIN")
+    : storedUser.role_name === "ROLE_ADMIN";
+console.log('isAdmin: ', isAdmin)
     const [openConfig, setOpenConfig] = useState(false);
     const toggleConfig = () => setOpenConfig(!openConfig);
   return (
@@ -18,6 +21,16 @@ export default function SidebarNav() {
             <span className="text-label ms-2">Inicio</span>
           </Link>
         </li>
+        {(isAdmin || isFacturador) && (
+          <>          
+            <li className="nav-item">
+              <Link className="nav-link" to="/invoicing/">
+                <i className="bi bi-receipt"></i>
+                <span className="text-label ms-2">Facturación</span>
+              </Link>
+            </li>
+          </>
+        )}
         <li className="nav-item">
           <Link className="nav-link" to="/profile">
             <i className="bi bi-person"></i>
