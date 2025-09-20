@@ -3300,3 +3300,24 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
   border: 1px solid #858b85;
   padding: 0px 6px;
 }
+.blanco-status {
+  background-color: white;
+}
+.amarillo-status {
+  background-color: #f7f794;
+}
+.verde-status {
+  background-color: #68e568;
+}
+.rojo-status {
+  background-color: #d9534f;
+}
+.gris-status {
+  background-color: #a8b4a8;
+}
+.blanco-status:hover, .amarillo-status:hover, .verde-status:hover, .rojo-status:hover, .gris-status:hover {
+   background-color: #E3F2FD;
+}
+.text-light-gray {
+  color: #adb5bd;
+}

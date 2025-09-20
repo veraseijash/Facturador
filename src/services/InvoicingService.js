@@ -4,3 +4,8 @@ export const buscarPorFechaByTipo = async (filter) => {
   const { data } = await api.post(`dataPrimerNivel/por-fecha-tipo`, filter);
   return data;
 }; 
+
+export const updateStatusPrefactura = async (id, statusData) => {
+  const { data } = await api.patch(`statusPrefactura/${id}`, statusData);
+  return data;
+}; 
