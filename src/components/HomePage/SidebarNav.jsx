@@ -9,7 +9,6 @@ export default function SidebarNav() {
     const isFacturador = Array.isArray(storedUser.role_name)
     ? storedUser.role_name.includes("ROLE_ADMIN")
     : storedUser.role_name === "ROLE_ADMIN";
-console.log('isAdmin: ', isAdmin)
     const [openConfig, setOpenConfig] = useState(false);
     const toggleConfig = () => setOpenConfig(!openConfig);
   return (
@@ -17,7 +16,7 @@ console.log('isAdmin: ', isAdmin)
       <ul className="nav flex-column">
         <li className="nav-item">
           <Link className="nav-link" to="/">
-            <i className="bi bi-house"></i>
+            <span className="ico ico-home"></span>
             <span className="text-label ms-2">Inicio</span>
           </Link>
         </li>
@@ -25,7 +24,7 @@ console.log('isAdmin: ', isAdmin)
           <>          
             <li className="nav-item">
               <Link className="nav-link" to="/invoicing/">
-                <i className="bi bi-receipt"></i>
+                <span className="ico ico-document-fill"></span>
                 <span className="text-label ms-2">Facturación</span>
               </Link>
             </li>
@@ -33,7 +32,7 @@ console.log('isAdmin: ', isAdmin)
         )}
         <li className="nav-item">
           <Link className="nav-link" to="/profile">
-            <i className="bi bi-person"></i>
+            <span className="ico ico-user1"></span>
             <span className="text-label ms-2">Perfil</span>
           </Link>
         </li>
@@ -46,7 +45,7 @@ console.log('isAdmin: ', isAdmin)
                 onClick={toggleConfig}
                 style={{ border: "none", background: "transparent" }}
               >
-                <i className="bi bi-gear"></i>
+                <span className="ico ico-equalizer1"></span>
                 <span className="text-label ms-2">Configuración</span>
                 <i
                   className={`bi ms-auto ${
@@ -61,13 +60,13 @@ console.log('isAdmin: ', isAdmin)
               <ul className="nav flex-column ms-4">
                 <li className="nav-item">
                   <Link className="nav-link" to="/config/users">
-                    <i className="bi bi-people"></i>
+                    <span className="ico ico-users1"></span>
                     <span className="ms-2">Usuarios</span>
                   </Link>
                 </li>
                 <li className="nav-item">
                   <Link className="nav-link" to="/config/preferences">
-                    <i className="bi bi-tools"></i>
+                    <span className="ico ico-cog2"></span>
                     <span className="ms-2">Preferencias</span>
                   </Link>
                 </li>

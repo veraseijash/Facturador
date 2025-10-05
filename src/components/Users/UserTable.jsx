@@ -12,6 +12,7 @@ export default function UserTable({ users, setUsers }) {
 
     // Función para cambiar el estado activo
     const handleToggleActivo = async (userId, currentActivo) => {
+        console.log('currentActivo: ', currentActivo)
         const newActivo = !currentActivo;
         try {
             // Actualiza en la API

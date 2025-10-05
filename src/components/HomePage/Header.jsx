@@ -23,8 +23,8 @@ export default function Header() {
                     />
                 <span className="ms-1">Cerrar sesión</span>
             </a>
-            <button type="button" className="btn btn-link btn-sm position-relative">
-                <i className="bi bi-bell-fill" style={{ fontSize: "24px"}}></i>
+            <button type="button" className="btn btn-sign-in position-relative">
+                <span className="ico ico-bell1" style={{ fontSize: "24px"}}></span>
                 <span className="position-absolute top-0 start-90 translate-middle badge rounded-pill bg-danger ms-n2 mt-1">
                     4
                     <span className="visually-hidden">unread alerts</span>

@@ -5,6 +5,11 @@
 
 * Copyright 2025 Hector Vera 
 */
+:root {
+  --bs-primary: #0A6E9F;
+  --bs-tooltip-color: #0A6E9F !important;
+  --bs-tooltip-bg: #0A6E9F !important;
+}
 
 body {
   padding: 0;
@@ -16,6 +21,29 @@ body {
   font-weight: 400;
   font-family: open sans, Helvetica, Arial, sans-serif;
   overflow-y: hidden !important;
+}
+.btn-outline-primary {
+  --bs-btn-color: #0A6E9F;
+  --bs-btn-border-color: #0A6E9F;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #0A6E9F;
+  --bs-btn-hover-border-color: #0A6E9F;
+  --bs-btn-focus-shadow-rgb: 13,110,253;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #0A6E9F;
+  --bs-btn-active-border-color: #0A6E9F;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #0A6E9F;
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: #0A6E9F;
+  --bs-gradient: none;
+}
+.form-check-input:checked {
+  background-color: #0A6E9F;
+  border-color: #0A6E9F;
+}
+.text-primary {
+  color: var(--bs-primary) !important;
 }
 
 .inter-regular {
@@ -294,7 +322,11 @@ body {
 }
 
 .main-background {
-  background: var(--bs-gray-200);
+  background: #0A6E9F;
+  color: white;
+}
+.main-background .nav-link, .main-background  .text-label {
+  color: white;
 }
 
 .header-btn {
@@ -315,7 +347,7 @@ body {
   cursor: pointer;
 }
 .btn-sign-in span {
-  opacity: .5;
+  opacity: 1;
 }
 
 .login-form {
@@ -3277,28 +3309,26 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
 
 .blancoConPlan, .blancoSinPlan,.blancoConPlan:hover, .blancoSinPlan:hover {
   background-color: white;
-  border: 1px solid #858b85;
   padding: 0px 6px;
 }
 .amarilloConPlan, .amarilloSinPlan, .amarilloConPlan:hover, .amarilloSinPlan:hover {
   background-color: #f7f794;
-  border: 1px solid #858b85;
   padding: 0px 6px;
 }
 .verdeConPlan, .verdeSinPlan, .verdeConPlan:hover, .verdeSinPlan:hover {
   background-color: #68e568;
-  border: 1px solid #858b85;
   padding: 0px 6px;
 }
 .rojoConPlan, .rojoSinPlan, .rojoConPlan:hover, .rojoSinPlan:hover {
   background-color: #d9534f;
-  border: 1px solid #858b85;
   padding: 0px 6px;
 }
 .grisConPlan, .grisSinPlan, .grisConPlan:hover, .grisSinPlan:hover {
   background-color: #a8b4a8;
-  border: 1px solid #858b85;
   padding: 0px 6px;
+}
+.bg-primary-live {
+  background-color: #eef6fc !important;
 }
 .blanco-status {
   background-color: white;
@@ -3320,4 +3350,26 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
 }
 .text-light-gray {
   color: #adb5bd;
+}
+/* Fondo */
+.tooltip-inner {
+  background-color: var(--bs-primary) !important;
+  color: #fff !important;
+}
+
+.tooltip .tooltip-arrow {
+  border-color: var(--bs-primary) !important;
+}
+.bs-tooltip-auto[data-popper-placement^="top"] .tooltip-arrow::before, .bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: var(--bs-primary) !important;
+}
+.bs-tooltip-auto[data-popper-placement^="bottom"] .tooltip-arrow::before, .bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: var(--bs-primary);
+}
+.bs-tooltip-auto[data-popper-placement^="left"] .tooltip-arrow::before, .bs-tooltip-start .tooltip-arrow::before {
+  left: -1px;
+  border-left-color: var(--bs-primary);
+}
+.bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before, .bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: var(--bs-primary);
 }

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { buscarPorFechaByTipo, updateStatusPrefactura } from "../../services/InvoicingService";
 import { formatValue } from "../../utils/format";
 import { toast } from "react-toastify";
+import InvoicingDetails from "./InvoicingDetails";
 
-export default function InvoicingTable({ setType, setDate }) {
+export default function InvoicingTable({ setType, setDate, setOption, }) {
     const [showFilter, setShowFilter] = useState(false);
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -14,20 +15,22 @@ export default function InvoicingTable({ setType, setDate }) {
     const [cantContrato, setCantContrato] = useState(0);
     const [sumaConsumido, setSumaConsumido] = useState(0);
 
-    // Ejecutar la consulta cada vez que cambien setDate o setType
-    useEffect(() => {
-        fetchData();
-    }, [setDate, setType]);
+    const [expandedRows, setExpandedRows] = useState([]);
 
+    const toggleRow = (id) => {
+    setExpandedRows((prev) =>
+        prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+    );
+    };
+    
     const fetchData = async () => {
-        if (!setDate || !setType) return;
-
+        if (!setDate || !setType || !setOption) return;
         setLoading(true);
         try {
             const filter = {
                 fecha: setDate,
-                tipo: "Con Plan",
-                option: setType,
+                tipo: setType,
+                option: setOption,
             };
             const result = await buscarPorFechaByTipo(filter);
             setData(result);
@@ -47,6 +50,10 @@ export default function InvoicingTable({ setType, setDate }) {
             setLoading(false);
         }
     };
+    useEffect(() => {
+        fetchData();
+    }, [setDate, setType, setOption]);
+
 
     // 🔽 Componente para manejar el dropdown de estados
     const DropdownStatus = ({ ultimo, item }) => {
@@ -71,7 +78,6 @@ export default function InvoicingTable({ setType, setDate }) {
                     user_name: item.cliente?.user?.user_name || "desconocido",
                     color_status: statusMap[cssClass],
                 };
-                console.log('statusData: ', statusData);
                 await updateStatusPrefactura(ultimo.id, statusData);
                 // Actualizar el estado local de filteredData para cambiar el color del botón
                 setFilteredData(prevData =>
@@ -129,7 +135,7 @@ export default function InvoicingTable({ setType, setDate }) {
                     <button
                         type="button"
                         id="listFilter"
-                        className="btn btn-sm btn-outline-primary"
+                        className="btn btn-sign-in"
                         onClick={() => {
                             if (showFilter) {
                                 setFilterText("");
@@ -138,7 +144,7 @@ export default function InvoicingTable({ setType, setDate }) {
                             setShowFilter(!showFilter);
                         }}
                     >
-                        <i className="bi bi-funnel-fill"></i>
+                        <span className="ico ico-search1"></span>
                     </button>
                     {showFilter && (
                         <div className="input-group input-group-sm ms-2">
@@ -186,15 +192,18 @@ export default function InvoicingTable({ setType, setDate }) {
                             >
                                 <i className={`bi bi-chevron-up collapse-icon ${isOpen ? "" : "rotate"}`}></i>
                             </button>
-                            <div className="ms-2 fw-bold h6 mb-0">Clientes con contrato:</div>
+                            <div className="ms-2 fw-bold h6 mb-0">
+                                {setType === "Con Plan" ? "Clientes con contrato:" : "Cliente prepago:"}
+                            </div>
                             <span className="ms-2 h6 mb-0">{cantContrato}</span>
-                            <div className="ms-5 fw-bold h6 mb-0">Total pendiente:</div>
+                            <div className="ms-5 fw-bold h6 mb-0">Total movimientos:</div>
                             <span className="ms-2 h6 mb-0">{formatValue(sumaConsumido)}</span>
                         </div>
                         <div className={`collapse-content ${isOpen ? "show" : ""}`} id="collapseContrato">
                             <table className="table table-sm">
                                 <thead>
                                     <tr>
+                                        <th></th>
                                         <th>Razon Social</th>
                                         <th></th>
                                         <th>condición<br />pago</th>
@@ -207,39 +216,73 @@ export default function InvoicingTable({ setType, setDate }) {
                                 <tbody>
                                     {filteredData.length > 0 ? (
                                         filteredData.map((item) => (
-                                            <tr key={item.id_primer_nivel}>
+                                            <React.Fragment key={item.id_primer_nivel}>
+                                            <tr>
+                                                <td>
+                                                <button
+                                                    className="btn btn-sm"
+                                                    type="button"
+                                                    onClick={() => toggleRow(item.id_primer_nivel)}
+                                                >
+                                                    <i
+                                                    className={`bi ${
+                                                        expandedRows.includes(item.id_primer_nivel)
+                                                        ? "bi-chevron-down"
+                                                        : "bi-chevron-up"
+                                                    } collapse-icon`}
+                                                    ></i>
+                                                </button>
+                                                </td>
                                                 <td>{item.razon_social}</td>
                                                 <td>{item.nro_documento}</td>
                                                 <td>{item.cliente?.condicion_pago || "30 días"}</td>
                                                 <td>
-                                                    {item.statusPrefacturas.length > 0 && (
-                                                        <DropdownStatus
-                                                            ultimo={item.statusPrefacturas[item.statusPrefacturas.length - 1]}
-                                                            item={item}
-                                                        />
-                                                    )}
+                                                {item.statusPrefacturas.length > 0 && (
+                                                    <DropdownStatus
+                                                    ultimo={
+                                                        item.statusPrefacturas[item.statusPrefacturas.length - 1]
+                                                    }
+                                                    item={item}
+                                                    />
+                                                )}
                                                 </td>
                                                 <td>
-                                                    {(item.tiene_doc > 0 || 
-                                                        (item.cliente.conOrdenCompra + item.cliente.conNumeroRecepcion + item.cliente.conEntradaMercaderia > 0)) && (
-                                                        <button className="btn btn-sm blancoConPlan text-light-gray">
-                                                        <i className="bi bi-file-earmark-fill"></i>
-                                                        </button>
-                                                    )}
+                                                {(item.tiene_doc > 0 ||
+                                                    (item.cliente.conOrdenCompra +
+                                                    item.cliente.conNumeroRecepcion +
+                                                    item.cliente.conEntradaMercaderia >
+                                                    0)) && (
+                                                    <button className="btn btn-sign-in blancoConPlan">
+                                                        <span className="ico ico-files-empty"></span>
+                                                    </button>
+                                                )}
                                                 </td>
                                                 <td className="text-end">{formatValue(item.total_consumido)}</td>
                                                 <td>
-                                                    <span className="fw-bold text-secondary">
-                                                        {item.cliente?.user?.user_name || ""}
-                                                    </span>
+                                                <span className="fw-bold text-secondary">
+                                                    {item.cliente?.user?.user_name || ""}
+                                                </span>
                                                 </td>
                                             </tr>
+
+                                            {/* Fila extra que se oculta o muestra */}
+                                            {expandedRows.includes(item.id_primer_nivel) && (
+                                                <tr>
+                                                <td colSpan={8} className="bg-light">
+                                                    <InvoicingDetails idPri={item.id_primer_nivel} setType={setType} setOption={setOption} />
+                                                </td>
+                                                </tr>
+                                            )}
+                                            </React.Fragment>
                                         ))
-                                    ) : (
+                                        ) : (
                                         <tr>
-                                            <td colSpan={6} className="text-center">No hay datos</td>
+                                            <td colSpan={8} className="text-center">
+                                            No hay datos
+                                            </td>
                                         </tr>
-                                    )}
+                                        )}
+
                                 </tbody>
                             </table>
                         </div>

@@ -7,6 +7,7 @@ import './assets/styles/main.css';
 import App from './App.jsx';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from "react-toastify";
+import './assets/icohv/style.css'
 
 // Importar React Query
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
