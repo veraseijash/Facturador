@@ -20,3 +20,13 @@ export const findDataPrimerNivelId = async (filter) => {
   const { data } = await api.post(`dataPrimerNivel/por-tipo-id`, filter);
   return data;
 }; 
+
+export const findActiveByCountry = async (countryId) => {
+  const { data } = await api.get(`serviciosWeb/country/${countryId}`);
+  return data;
+}
+
+export const getValoresEconomicos = async () => {
+  const { data } = await api.get(`valoresEconomicos/list`);
+  return data;
+}

@@ -11,6 +11,7 @@ export default function InvoicingDetails({ idPri, setType, setOption, }) {
 
   const [showModal, setShowModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  
   // Hook para inicializar tooltips cada vez que cambia el detalle
   useBootstrapTooltip([detalle]);
 
@@ -123,6 +124,13 @@ export default function InvoicingDetails({ idPri, setType, setOption, }) {
         onClose={() => setShowModal(false)}
         title="Agregar Item"
         selectedId={selectedId}
+        onSubmit={(datos) => {
+          console.log("Datos recibidos desde ItemModal:", datos);
+
+          // Aquí puedes actualizar tu detalle, hacer fetch, o enviar al backend
+          // Por ejemplo, refrescar la tabla:
+          setShowModal(false);
+        }}
       ></ItemModal>
     </div>
   );

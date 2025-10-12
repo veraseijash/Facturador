@@ -45,6 +45,12 @@ body {
 .text-primary {
   color: var(--bs-primary) !important;
 }
+.btn-primary {
+  --bs-btn-bg: #0A6E9F;
+  --bs-btn-border-color: #0A6E9F;
+  --bs-btn-disabled-bg: #0A6E9F;
+  --bs-btn-disabled-border-color: #0A6E9F;
+}
 
 .inter-regular {
   font-family: "Inter", sans-serif;
