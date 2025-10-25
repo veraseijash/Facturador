@@ -15,8 +15,12 @@ export const getDataPrimerNivelId = async (id) => {
   return data;
 }
 
+export const getDataSegundoNivelId = async (id) => {
+  const { data } = await api.get(`dataSegundoNivel/${id}`);
+  return data;
+}
+
 export const findDataPrimerNivelId = async (filter) => {
-  console.log('paso')
   const { data } = await api.post(`dataPrimerNivel/por-tipo-id`, filter);
   return data;
 }; 
@@ -28,5 +32,20 @@ export const findActiveByCountry = async (countryId) => {
 
 export const getValoresEconomicos = async () => {
   const { data } = await api.get(`valoresEconomicos/list`);
+  return data;
+}
+
+export const createDataTercerNivel = async (newItem) => {
+  const { data } = await api.post(`dataTercerNivel`, newItem);
+  return data;
+}
+
+export const deleteDataTercerNivel = async (id) => {
+  const { data } = await api.delete(`dataTercerNivel/${id}`);
+  return data;
+}
+
+export const actualizarTotales = async (id) => {
+  const { data } = await api.patch(`dataPrimerNivel/actualizar-totales/${id}`);
   return data;
 }

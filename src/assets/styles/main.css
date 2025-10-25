@@ -3314,7 +3314,7 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
 }
 
 .blancoConPlan, .blancoSinPlan,.blancoConPlan:hover, .blancoSinPlan:hover {
-  background-color: white;
+  background-color: rgb(243, 243, 243);
   padding: 0px 6px;
 }
 .amarilloConPlan, .amarilloSinPlan, .amarilloConPlan:hover, .amarilloSinPlan:hover {
@@ -3337,7 +3337,7 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
   background-color: #eef6fc !important;
 }
 .blanco-status {
-  background-color: white;
+  background-color: rgb(243, 243, 243);
 }
 .amarillo-status {
   background-color: #f7f794;
@@ -3378,4 +3378,10 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
 }
 .bs-tooltip-auto[data-popper-placement^="right"] .tooltip-arrow::before, .bs-tooltip-end .tooltip-arrow::before {
   border-right-color: var(--bs-primary);
+}
+.dropdown-menu {
+  z-index: 2000;
+}
+.dropdown-menu.active {
+  display: block !important;
 }

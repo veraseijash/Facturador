@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Modal } from "bootstrap";
-import { findActiveByCountry, getValoresEconomicos } from "../../services/InvoicingService";
+import { findActiveByCountry, getValoresEconomicos, getDataSegundoNivelId, createDataTercerNivel, actualizarTotales  } from "../../services/InvoicingService";
 
 export default function ItemModal({ show, onClose, title, selectedId, onSubmit}) {
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -8,12 +8,17 @@ export default function ItemModal({ show, onClose, title, selectedId, onSubmit})
   const bsModalRef = useRef(null);
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState("");
-  const [selectedUnidad, setSelectedUnidad ] = useState("");
+  const [selectedServiceName, setSelectedServiceName] = useState("");
+  const [selectedUnidad, setSelectedUnidad ] = useState("$");
   const [selecteCantidad, setSelectedCantidad] = useState("");
   const [selectedPrecio, setSelectedPrecio] = useState("");
   const [valoresEconomicos, setValoresEconomicos] = useState([]);
   const [selectedValorFecha, setSelectedValorFecha] = useState("");
   const [selectedValorUf, setSelectedValorUf] = useState("");
+  const [cuenta, setCuenta] = useState("");
+  const [idPriNivel, setIdPriNivel] = useState("");
+  const [nroDocumento, setNroDocumento] = useState("");
+  const [fecha, setFecha] = useState("");
 
   // Estados para validación
   const [errors, setErrors] = useState({
@@ -22,6 +27,7 @@ export default function ItemModal({ show, onClose, title, selectedId, onSubmit})
     selecteCantidad: false,
     selectedPrecio: false,
     selectedValorFecha: false,
+    selectedValorUf: false
   });
 
   useEffect(() => {
@@ -29,6 +35,10 @@ export default function ItemModal({ show, onClose, title, selectedId, onSubmit})
       bsModalRef.current = new Modal(modalRef.current, {
         backdrop: "static",
         keyboard: false,
+      });
+      // Escucha cuando la modal termina de ocultarse
+      modalRef.current.addEventListener("hidden.bs.modal", () => {
+        onClose(); // llama para desmontar React después
       });
     }
 
@@ -40,13 +50,29 @@ export default function ItemModal({ show, onClose, title, selectedId, onSubmit})
           .then((data) => setServices(data))
           .catch((error) => console.error("Error al cargar servicios:", error));
       }
+
+      if (selectedId) {
+      getDataSegundoNivelId(selectedId)
+        .then((data) => {
+          setCuenta(data.cuenta || "");
+          setNroDocumento(data.nro_documento || "");
+          setFecha(data.fecha || "");
+          setIdPriNivel(data.id_primer_nivel);
+        })
+        .catch((error) =>
+          console.error("Error al cargar datos del segundo nivel:", error)
+        );
+      }
     } else {
       bsModalRef.current.hide();
     }
-  }, [show]);
+  }, [show, onClose]);
 
   const handleSelectChange = (e) => {
-    setSelectedService(e.target.value);
+    const id = e.target.value;
+    const text = e.target.options[e.target.selectedIndex].text; 
+    setSelectedService(id);
+    setSelectedServiceName(text);
   };
 
   const handleSelectUnidad = async (e) => {
@@ -68,13 +94,15 @@ export default function ItemModal({ show, onClose, title, selectedId, onSubmit})
   };
 
   // Función de validación y envío
-  const handleEnviar = () => {
+  const handleEnviar = async () => {
     const newErrors = {
       selectedService: selectedService === "",
-      selectedUnidad: selectedUnidad === "",
+      selectedUnidad: !(selectedUnidad === "$" || selectedUnidad === "UF"),
       selecteCantidad: selecteCantidad === "",
       selectedPrecio: selectedPrecio === "",
       selectedValorFecha: selectedUnidad === "UF" && selectedValorFecha === "",
+      selectedValorUf: selectedUnidad === "UF" && selectedValorUf === ""
+
     };
 
     setErrors(newErrors);
@@ -86,25 +114,47 @@ export default function ItemModal({ show, onClose, title, selectedId, onSubmit})
     }
 
     // Formulario válido, aquí puedes enviar los datos
-    console.log("Formulario válido:", {
-      id_segundo_nivel: selectedId,
-      servicio: selectedService,
+    const newItem = {
+      cuenta: cuenta,
+      id_servicio: parseInt(selectedService, 10),
+      servicio: selectedServiceName,
+      cantidad: parseInt(selecteCantidad, 10),
+      precio: selectedPrecio.toString(),
+      total:
+        selectedUnidad === "UF"
+          ? Math.round(selecteCantidad * selectedPrecio * selectedValorUf)
+          : Math.round(selecteCantidad * selectedPrecio),
+      nro_documento: nroDocumento,
+      fecha: fecha,
+      tipo: "Con Plan",
       unidad: selectedUnidad,
-      cantidad: selecteCantidad,
-      precio: selectedPrecio,
-      valorFecha: selectedValorFecha,
-    });
-    // if (onSubmit) {
-    //   onSubmit({
-    //     id_segundo_nivel: selectedId,  // aquí pasamos el id del segundo nivel
-    //     servicio: selectedService,
-    //     unidad: selectedUnidad,
-    //     cantidad: selecteCantidad,
-    //     precio: selectedPrecio,
-    //     valorFecha: selectedValorFecha,
-    //     valorUf: selectedValorUf,
-    //   });
-    // }
+      fecha_uf: selectedUnidad === "UF" ? selectedValorFecha : null,
+      valor_uf: selectedUnidad === "UF" ? selectedValorUf.toString() : null,
+      id_primer_nivel: idPriNivel,
+      id_segundo_nivel: selectedId,
+      tiene_doc: 0,
+      tipo_modal: "Prefactura",
+      etiqueta: "agregado"
+    };
+    console.log('newItem: ', newItem)
+    try {
+      await createDataTercerNivel(newItem);
+      const totalResponse = await actualizarTotales(idPriNivel);
+      if (onSubmit) {
+        onSubmit({
+          success: true,
+          totalFacturado: totalResponse.totalFacturado,
+          totalPendiente: totalResponse.totalPendiente,
+        });
+      }
+
+      if (bsModalRef.current) {
+        bsModalRef.current.hide();
+      }
+    } catch (error) {
+      console.error("Error al crear el tercer nivel:", error);
+      if (onSubmit) onSubmit({ success: false });
+    }
   };
 
   return (
@@ -117,6 +167,11 @@ export default function ItemModal({ show, onClose, title, selectedId, onSubmit})
           </div>
 
           <div className="modal-body">
+            <div className="mb-3 p-2 border rounded bg-light">
+              <h6 className="fw-bold mb-1">Cuenta: {cuenta}</h6>
+              <p className="mb-0"><strong>N° Documento:</strong> {nroDocumento}</p>
+              <p className="mb-0"><strong>Fecha:</strong> {fecha}</p>
+            </div>
             <label htmlFor="serviceSelect" className="form-label">Servicio</label>
             <select
               id="serviceSelect"
