@@ -49,3 +49,8 @@ export const actualizarTotales = async (id) => {
   const { data } = await api.patch(`dataPrimerNivel/actualizar-totales/${id}`);
   return data;
 }
+
+export const compareConsumption = async (find) => {
+  const { data } = await api.post(`dataPrimerNivel/comparar`, find);
+  return data;
+}

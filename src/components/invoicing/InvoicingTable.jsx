@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { buscarPorFechaByTipo, updateStatusPrefactura } from "../../services/InvoicingService";
+import { Popover, Tooltip } from "bootstrap";
+import { buscarPorFechaByTipo, updateStatusPrefactura, compareConsumption } from "../../services/InvoicingService";
 import { formatValue } from "../../utils/format";
 import { toast } from "react-toastify";
 import InvoicingDetails from "./InvoicingDetails";
@@ -15,11 +16,46 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
     const [cantContrato, setCantContrato] = useState(0);
     const [sumaConsumido, setSumaConsumido] = useState(0);
     const [expandedRows, setExpandedRows] = useState([]);
+    const [comparaciones, setComparaciones] = useState({});
 
     const toggleRow = (id) => {
         setExpandedRows((prev) =>
             prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
         );
+    };
+    
+    const fetchComparaciones = async (datos) => {
+        const nuevasComparaciones = {};
+        
+        await Promise.all(
+            datos.map(async (item) => {
+                try {
+                    const result = await compareConsumption({ 
+                        id_cliente: item.id_cliente, 
+                        fecha: setDate 
+                    });
+                    nuevasComparaciones[item.id_primer_nivel] = result?.comparacion ?? 2;
+                } catch (error) {
+                    console.error("Error al obtener comparación:", error);
+                    nuevasComparaciones[item.id_primer_nivel] = 2; // valor por defecto si falla
+                }
+            })
+        );
+
+        setComparaciones(nuevasComparaciones);
+    };
+
+    const getComparacionIcon = (valor) => {
+        switch(valor) {
+            case 2:
+                return <i className="bi bi-arrow-up-short text-success"></i>;
+            case 1:
+                return <i className="bi bi-arrow-down-short text-danger"></i>;
+            case 0:
+                return <i className="bi bi-arrows text-secondary"></i>;
+            default:
+                return "-";
+        }
     };
 
     const fetchData = async () => {
@@ -34,6 +70,7 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
 
             const suma = result.reduce((acc, item) => acc + (item.total_consumido || 0), 0);
             setSumaConsumido(suma);
+            fetchComparaciones(result);
         } catch (error) {
             console.error("Error fetching data:", error);
             setData([]);
@@ -46,6 +83,13 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
     useEffect(() => {
         fetchData();
     }, [setDate, setType, setOption]);
+
+    useEffect(() => {
+        const popoverTriggerList = Array.from(
+            document.querySelectorAll('[data-bs-toggle="popover"]')
+        );
+        popoverTriggerList.forEach((el) => new Popover(el));
+    }, [filteredData]);
 
     const DropdownStatus = ({ ultimo, item }) => {
     const [isActive, setIsActive] = useState(false);
@@ -109,6 +153,7 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
         }
         setIsActive(!isActive);
     };
+
 
     return (
         <>
@@ -193,7 +238,7 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
                         </div>
                     )}
                 </div>
-                <div>Tipo: {setType}</div>
+                <div className="text-primary"><strong>{setType}</strong></div>
             </div>
             <div className="card-body">
                 {loading ? (
@@ -226,6 +271,8 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
                                         <th></th>
                                         <th className="text-end">Total neto</th>
                                         <th></th>
+                                        <th></th>
+                                        <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -257,6 +304,19 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
                                                     )}
                                                 </td>
                                                 <td className="text-end">{formatValue(item.total_consumido)}</td>
+                                                <td className="text-center">
+                                                    {getComparacionIcon(comparaciones[item.id_primer_nivel])}
+                                                </td>
+                                                <td>
+                                                    <button type="button" className="btn btn-sign-in" data-bs-container="body" data-bs-toggle="popover"
+                                                     data-bs-title="Comentario" data-bs-placement="top" data-bs-content={item.cliente?.comentario || "Sin comentario"}>
+                                                        <span
+                                                            className={`ico ico-comment-stroke ${
+                                                            !item.cliente?.comentario ? "text-secondary" : ""
+                                                            }`}
+                                                        ></span>
+                                                    </button>
+                                                </td>
                                                 <td>
                                                     <span className="fw-bold text-secondary">{item.cliente?.user?.user_name || ""}</span>
                                                 </td>
@@ -265,7 +325,7 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
                                             {/* Fila expandible */}
                                             {expandedRows.includes(item.id_primer_nivel) && (
                                                 <tr>
-                                                    <td colSpan={8} className="bg-light">
+                                                    <td colSpan={10} className="bg-light">
                                                         <InvoicingDetails
                                                             idPri={item.id_primer_nivel}
                                                             setType={setType}
@@ -305,7 +365,7 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
                                         </React.Fragment>
                                     )) : (
                                         <tr>
-                                            <td colSpan={8} className="text-center">No hay datos</td>
+                                            <td colSpan={10} className="text-center">No hay datos</td>
                                         </tr>
                                     )}
                                 </tbody>
