@@ -3339,20 +3339,32 @@ section.ant-layout.ant-layout-has-sider.layout-dashboard.layout-profile
 .blanco-status {
   background-color: rgb(243, 243, 243);
 }
+.blanco-status:hover {
+  background-color: rgb(226, 226, 226);
+}
 .amarillo-status {
   background-color: #f7f794;
+}
+.amarillo-status:hover {
+  background-color: #dada83;
 }
 .verde-status {
   background-color: #68e568;
 }
+.verde-status:hover {
+  background-color: #53b953;
+}
 .rojo-status {
   background-color: #d9534f;
+}
+.rojo-status:hover {
+  background-color: #af433f;
 }
 .gris-status {
   background-color: #a8b4a8;
 }
-.blanco-status:hover, .amarillo-status:hover, .verde-status:hover, .rojo-status:hover, .gris-status:hover {
-   background-color: #E3F2FD;
+.gris-status:hover {
+  background-color: #848d84;
 }
 .text-light-gray {
   color: #adb5bd;
