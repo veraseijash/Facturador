@@ -14,6 +14,8 @@ import DocumentModal from "../../components/invoicing/DocumentModal"
 export default function InvoicingTable({ setType, setDate, setOption }) {
   const [showModal, setShowModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [nroDocumento, setNroDocumento] = useState(null);
+  const [periodo, setPeriodo] = useState(null);
   const [showFilter, setShowFilter] = useState(false);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -439,6 +441,8 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
                               <button className="btn btn-sign-in blancoConPlan"
                               onClick={() => {
                                 setSelectedId(item.id_primer_nivel);
+                                setNroDocumento(item.nro_documento);
+                                setPeriodo(item.fecha);
                                 setShowModal(true);
                               }}>
                                 <span className="ico ico-files-empty"></span>
@@ -548,7 +552,9 @@ export default function InvoicingTable({ setType, setDate, setOption }) {
       <DocumentModal 
         show={showModal} 
         onClose={() => setShowModal(false)}
-        idPrimerNivel={selectedId} />
+        idPrimerNivel={selectedId}
+        nroDocumento={nroDocumento}
+        periodo={periodo} />
     </div>
   );
 }

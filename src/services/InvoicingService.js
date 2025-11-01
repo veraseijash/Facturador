@@ -54,3 +54,13 @@ export const compareConsumption = async (find) => {
   const { data } = await api.post(`dataPrimerNivel/comparar`, find);
   return data;
 }
+
+export const getDocumentosFacturador = async (id) => {
+  const { data } = await api.get(`documentosFacturador/find/${id}`);
+  return data;
+}
+
+export const getCotizacionesDocumentos = async (id) => {
+  const { data } = await api.get(`cotizacionesDocumentos/find/${id}`);
+  return data;
+}

@@ -1605,6 +1605,16 @@ span.ismobile {
   color: #8c8c8c;
 }
 
+p.ant-typography {
+  color: #8c8c8c;
+  margin-bottom: 0;
+}
+div.ant-typography {
+  color: #8c8c8c;
+  margin-bottom: 0;
+  font-size: 80%;
+}
+
 .sidebarnav-color .trans {
   margin-top: 1rem;
   display: flex;
