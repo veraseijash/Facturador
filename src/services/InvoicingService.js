@@ -64,3 +64,33 @@ export const getCotizacionesDocumentos = async (id) => {
   const { data } = await api.get(`cotizacionesDocumentos/find/${id}`);
   return data;
 }
+
+export const createDocumentosFacturador = async (newDocument) => {
+  try {
+    const { data } = await api.post(`documentosFacturador/insert`, newDocument);
+    return data;
+  } catch (error) {
+    console.error("❌ Error subiendo documento:", error.response?.data || error);
+    throw error;
+  }
+}
+
+export const uploadPdf = async (pdfFile) => {
+  const formData = new FormData();
+  formData.append("file", pdfFile);
+
+  const { data } = await api.post(`/documentosFacturador`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+};
+
+export const deleteDocumentosFacturador = async (id) => {
+  const { data } = await api.delete(`documentosFacturador/${id}`);
+  return data;
+}
+
+export const deleteCreateCotizaciones = async (id) => {
+  const { data } = await api.delete(`cotizacionesDocumentos/${id}`);
+  return data;
+}

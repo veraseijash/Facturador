@@ -1,6 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Modal, Tooltip } from "bootstrap";
-import { getDocumentosFacturador, getCotizacionesDocumentos  } from "../../services/InvoicingService"
+import { 
+  getDocumentosFacturador, 
+  getCotizacionesDocumentos, 
+  uploadPdf,
+  createDocumentosFacturador,
+  deleteDocumentosFacturador,
+  deleteCreateCotizaciones,
+} from "../../services/InvoicingService"
+import { toast } from "react-toastify";
 
 export default function ModalComponent({ show, onClose, idPrimerNivel, nroDocumento, periodo }) {
   
@@ -9,9 +17,10 @@ export default function ModalComponent({ show, onClose, idPrimerNivel, nroDocume
   const uploadBtnRef = useRef(null);
   const fileInputRef = useRef(null);
   const [fileName, setFileName] = useState("");
-
-  console.log('nroDocumento: ', nroDocumento);
-  console.log('periodo: ', periodo);
+  const [file, setFile] = useState(null);
+  const [selecteTipo, setSelectedTipo] = useState("");
+  const [selecteId, setSelectedId] = useState("");
+  const [selecteDate, setSelectedDate] = useState("");
 
   const [documentosFacturados, setDocumentosFacturados] = useState([]);
   const [cotizaciones, setCotizaciones] = useState([]);
@@ -43,14 +52,17 @@ export default function ModalComponent({ show, onClose, idPrimerNivel, nroDocume
   };
   // Manejar archivo seleccionado
   const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.type !== "application/pdf") {
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+      if (selectedFile.type !== "application/pdf") {
         alert("Solo se permiten archivos PDF.");
-        event.target.value = ""; // limpia el input
+        event.target.value = "";
+        setFile(null);
+        setFileName("");
         return;
       }
-      setFileName(file.name);
+      setFile(selectedFile);
+      setFileName(selectedFile.name);
     }
   };
 
@@ -90,6 +102,187 @@ export default function ModalComponent({ show, onClose, idPrimerNivel, nroDocume
       modalInstance.current.hide();
     }
   }, [show, idPrimerNivel]);
+
+  // 🔹 Subir archivo
+  const handleUpload = async () => {
+    // Validaciones front-end antes de subir el archivo
+    let isValid = true;
+
+    // Limpia estados visuales previos
+    document.getElementById("TipoDoc")?.classList.remove("is-invalid");
+    document.getElementById("DateDoc")?.classList.remove("is-invalid");
+    document.getElementById("NroDoc")?.classList.remove("is-invalid");
+
+    // 1️⃣ Validar tipo de documento
+    if (!selecteTipo || selecteTipo === "-1") {
+      document.getElementById("TipoDoc")?.classList.add("is-invalid");
+      isValid = false;
+    }
+
+    // 2️⃣ Validar fecha de documento
+    if (!selecteDate) {
+      document.getElementById("DateDoc")?.classList.add("is-invalid");
+      isValid = false;
+    }
+
+    // 3️⃣ Validar ID del documento
+    if (!selecteId) {
+      document.getElementById("NroDoc")?.classList.add("is-invalid");
+      isValid = false;
+    }
+
+    // 4️⃣ Validar archivo seleccionado
+    if (!file) {
+      toast.warning("Debe seleccionar un archivo PDF antes de subirlo");
+      isValid = false;
+    }
+
+    // Si hay errores, no continúa
+    if (!isValid) {
+      toast.error("Por favor, complete todos los campos obligatorios");
+      return;
+    }
+
+    try {
+      const res = await uploadPdf(file);
+      console.log("Respuesta del backend:", res);
+
+      toast.success(`Archivo ${res.fileName} subido correctamente!`);
+      if (res.message === 'ok') {
+        const newItem = {
+          id_documento: selecteId,
+          tipo_documento: selecteTipo,
+          fecha_documento: new Date(selecteDate).toISOString(),
+          nombre_documento: res.fileName,
+          fecha: periodo,
+          nro_documento: nroDocumento,
+          id_primer_nivel: idPrimerNivel,
+          procedencia: 'Facturacion',
+          cot_id: 0,
+          identificador: 0,
+          id_tercer_nivel: 0,
+        }
+        try {
+          await createDocumentosFacturador(newItem);
+          toast.success(`Documento registrado correctamente!`);
+          // 🔹 Actualiza la tabla con el nuevo documento
+          const updatedDocs = await getDocumentosFacturador(idPrimerNivel);
+          setDocumentosFacturados(updatedDocs || []);
+        } catch (error) {
+          console.error("Error subiendo PDF:", error);
+          toast.error("Error al registrar");
+        }
+      }
+
+      // Limpia los campos
+      setFile(null);
+      setFileName("");
+      setSelectedTipo("");
+      setSelectedId("");
+      setSelectedDate("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      document.getElementById("TipoDoc").value = "-1";
+      document.getElementById("NroDoc").value = "";
+      document.getElementById("DateDoc").value = "";
+
+      // Recarga lista de documentos
+      getDocumentosFacturador(idPrimerNivel)
+        .then((res) => setDocumentosFacturados(res || []))
+        .catch((err) => console.error("Error recargando documentos:", err));
+
+    } catch (error) {
+      console.error("Error subiendo PDF:", error);
+      alert("Error al subir el archivo");
+    }
+  };
+
+  const handleDeleteDocumento = (id) => {
+    toast.info(
+      <div className="p-2">
+        <h6 className="mb-2">¿Eliminar documento?</h6>
+        <div className="text-end">
+          <button
+            className="btn btn-danger btn-sm me-2"
+            onClick={async () => {
+              try {
+                await deleteDocumentosFacturador(id);
+                toast.dismiss();
+                toast.success("Documento eliminado correctamente");
+
+                // Recarga lista
+                const updatedDocs = await getDocumentosFacturador(idPrimerNivel);
+                setDocumentosFacturados(updatedDocs || []);
+              } catch (error) {
+                console.error(error);
+                toast.dismiss();
+                toast.error("Error al eliminar el documento");
+              }
+            }}
+          >
+            <i className="bi bi-trash"></i> Sí
+          </button>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => toast.dismiss()}
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>,
+      {
+        position: "top-center",
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        hideProgressBar: true,
+        className: "border border-warning bg-light shadow",
+      }
+    );
+  };
+
+  const handleDeleteCotizacion = async (id) => {
+    toast.info(
+      <div className="p-2">
+        <h6 className="mb-2">¿Eliminar documento?</h6>
+        <div className="text-end">
+          <button
+            className="btn btn-danger btn-sm me-2"
+            onClick={async () => {
+              try {
+                await deleteCreateCotizaciones(id);
+                toast.dismiss();
+                toast.success("Documento eliminado correctamente");
+
+                // Recarga lista
+                const updatedDocs = await getCotizacionesDocumentos(idPrimerNivel);
+                setCotizaciones(updatedDocs || []);
+              } catch (error) {
+                console.error(error);
+                toast.dismiss();
+                toast.error("Error al eliminar el documento");
+              }
+            }}
+          >
+            <i className="bi bi-trash"></i> Sí
+          </button>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => toast.dismiss()}
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>,
+      {
+        position: "top-center",
+        autoClose: false,
+        closeOnClick: false,
+        draggable: false,
+        hideProgressBar: true,
+        className: "border border-warning bg-light shadow",
+      }
+    );
+  };
 
   return (
     <div
@@ -147,7 +340,10 @@ export default function ModalComponent({ show, onClose, idPrimerNivel, nroDocume
                         </p>
                       </td>
                       <td className="text-end align-middle">
-                        <button className="btn btn-outline-danger btn-sm">
+                        <button 
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleDeleteDocumento(doc.id)}
+                        >
                           <span className="ico ico-trash"></span>
                         </button>
                       </td>
@@ -197,7 +393,10 @@ export default function ModalComponent({ show, onClose, idPrimerNivel, nroDocume
                         </p>
                       </td>
                       <td className="text-end align-middle">
-                        <button className="btn btn-outline-danger btn-sm">
+                        <button 
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleDeleteCotizacion(cot.id)}
+                        >
                           <span className="ico ico-trash"></span>
                         </button>
                       </td>
@@ -219,8 +418,15 @@ export default function ModalComponent({ show, onClose, idPrimerNivel, nroDocume
               <div className="row">
                 <div className="col">
                   <label htmlFor="TipoDoc" className="form-label">Tipo</label>
-                  <select id="TipoDoc" className="form-select">
-                    <option value={-1} disabled>Seleccione...</option>
+                  <select 
+                    id="TipoDoc" 
+                    className="form-select" 
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedTipo(value);
+                    }}
+                  >
+                    <option value={-1}>Seleccione...</option>
                     <option value={1}>801 - Orden de compra</option>
                     <option value={2}>802 - Nota de pedido</option>
                     <option value={3}>803 - Contrato</option>
@@ -234,11 +440,28 @@ export default function ModalComponent({ show, onClose, idPrimerNivel, nroDocume
                 </div>
                 <div className="col">
                   <label htmlFor="NroDoc" className="form-label">Número</label>
-                  <input id="NroDoc" className="form-control" type="text" placeholder="Nro. documento..."></input>
+                  <input 
+                    id="NroDoc" 
+                    className="form-control" 
+                    type="text" 
+                    placeholder="Nro. documento..."
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedId(value);
+                    }}
+                  ></input>
                 </div>
                 <div className="col">
                   <label htmlFor="DateDoc" className="form-label">Fecha</label>
-                  <input id="DateDoc" className="form-control" type="date"></input>
+                  <input 
+                    id="DateDoc" 
+                    className="form-control" 
+                    type="date"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedDate(value);
+                    }}
+                  ></input>
                 </div>
                 <div className="col">
                   <div className="d-flex pt-2">
@@ -253,9 +476,11 @@ export default function ModalComponent({ show, onClose, idPrimerNivel, nroDocume
                     >
                       <span className="ico ico-cloud-upload1"></span>
                     </button>
+                    {/* 🔹 BOTÓN REGISTRAR */}
                     <button 
                       className="btn btn-outline-primary btn-sm ms-2"
                       disabled={!fileName}
+                      onClick={handleUpload} // 👈 aquí llamamos al servicio
                     >
                       Registrar
                     </button>
